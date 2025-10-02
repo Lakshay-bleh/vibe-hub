@@ -1399,12 +1399,6 @@ function MarkdownPreviewer() {
             />
           </div>
         </div>
-        <p className="rounded-2xl border border-dashed border-border/60 bg-background/60 p-3 text-xs text-muted-foreground">
-          For full CommonMark support and advanced sanitization, install
-          <code className="mx-1 rounded bg-muted px-1">marked</code> or
-          <code className="mx-1 rounded bg-muted px-1">markdown-it</code> with
-          DOMPurify.
-        </p>
       </CardContent>
     </Card>
   );
