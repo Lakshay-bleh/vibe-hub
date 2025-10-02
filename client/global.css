@@ -1,0 +1,114 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    --background: 222 33% 98%;
+    --foreground: 229 22% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 229 22% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 229 22% 15%;
+
+    --primary: 266 93% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 217 55% 94%;
+    --secondary-foreground: 229 30% 18%;
+
+    --muted: 222 16% 88%;
+    --muted-foreground: 226 18% 40%;
+
+    --accent: 192 93% 43%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 6 78% 57%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 223 23% 87%;
+    --input: 223 23% 87%;
+    --ring: 266 93% 60%;
+
+    --radius: 0.75rem;
+
+    --sidebar-background: 222 44% 96%;
+    --sidebar-foreground: 229 32% 20%;
+    --sidebar-primary: 266 93% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 73% 92%;
+    --sidebar-accent-foreground: 229 30% 20%;
+    --sidebar-border: 225 28% 85%;
+    --sidebar-ring: 192 93% 43%;
+  }
+
+  .dark {
+    --background: 224 60% 7%;
+    --foreground: 210 40% 96%;
+
+    --card: 222 48% 9%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 222 48% 9%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 266 93% 70%;
+    --primary-foreground: 225 28% 15%;
+
+    --secondary: 227 18% 22%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 225 22% 26%;
+    --muted-foreground: 215 20% 80%;
+
+    --accent: 192 93% 50%;
+    --accent-foreground: 224 60% 10%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 210 40% 96%;
+
+    --border: 227 22% 24%;
+    --input: 227 22% 24%;
+    --ring: 266 93% 70%;
+
+    --sidebar-background: 225 28% 15%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 266 93% 70%;
+    --sidebar-primary-foreground: 224 60% 10%;
+    --sidebar-accent: 222 26% 24%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 225 20% 19%;
+    --sidebar-ring: 192 93% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  code,
+  pre,
+  textarea {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+      Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+}
