@@ -1466,7 +1466,7 @@ export default function Index() {
                 </Button>
               </div>
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            {/* <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-border/60 bg-background/80 p-4">
                 <p className="text-xs text-muted-foreground">Utilities</p>
                 <p className="text-xl font-semibold">6 tools</p>
@@ -1481,7 +1481,7 @@ export default function Index() {
                   {theme === "light" ? "Light" : "Dark"} mode
                 </p>
               </div>
-            </div>
+            </div> */}
           </header>
           <ToolChips activeTool={activeTool} onSelect={setActiveTool} />
           <section className="flex-1 space-y-6 pb-12">
