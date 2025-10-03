@@ -440,7 +440,7 @@ function ToolSidebar({
   onSelect: (tool: ToolId) => void;
 }) {
   return (
-    <aside className="hidden w-full max-w-xs flex-col gap-6 rounded-3xl border border-border/70 bg-card/70 p-6 shadow-soft backdrop-blur lg:flex">
+    <aside className="hidden w-full max-w-[20rem] max-h-[800px] flex-col gap-6 rounded-3xl border border-border/70 bg-card/70 p-6 shadow-soft backdrop-blur lg:flex">
       <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm font-medium text-primary">
         <Layers className="h-5 w-5" />
         <div>
