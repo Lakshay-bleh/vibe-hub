@@ -1467,6 +1467,37 @@ export default function Index() {
   const { theme, toggle } = useThemeMode();
   const [activeTool, setActiveTool] = useState<ToolId>("json");
 
+  useEffect(() => {
+    const toolIds: ToolId[] = [
+      "json",
+      "uuid",
+      "palette",
+      "regex",
+      "base64",
+      "markdown",
+    ];
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+        e.preventDefault(); // prevent page scroll
+
+        const currentIndex = toolIds.indexOf(activeTool);
+        let nextIndex;
+
+        if (e.key === "ArrowDown") {
+          nextIndex = (currentIndex + 1) % toolIds.length;
+        } else {
+          nextIndex = (currentIndex - 1 + toolIds.length) % toolIds.length;
+        }
+
+        setActiveTool(toolIds[nextIndex]);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeTool]);
+  
   const renderActiveTool = () => {
     switch (activeTool) {
       case "json":
