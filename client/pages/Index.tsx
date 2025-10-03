@@ -25,6 +25,8 @@ import {
   SunMedium,
   Trash2,
 } from "lucide-react";
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -412,7 +414,7 @@ function renderMarkdown(markdown: string) {
 
   const flushParagraph = () => {
     if (paragraph.length) {
-      htmlParts.push(`<p>${applyInlineFormatting(paragraph.join(" "))}</p>`);
+      htmlParts.push(`<p>${applyInlineFormatting(paragraph.join("\n").trim())}</p>`);
       paragraph = [];
     }
   };
@@ -420,7 +422,7 @@ function renderMarkdown(markdown: string) {
   const flushList = () => {
     if (listItems.length) {
       const listHtml = listItems
-        .map((item) => `<li>${applyInlineFormatting(item)}</li>`)
+        .map((item) => `<li>${applyInlineFormatting(item.trim())}</li>`)
         .join("");
       htmlParts.push(`<ul>${listHtml}</ul>`);
       listItems = [];
@@ -430,7 +432,7 @@ function renderMarkdown(markdown: string) {
   const flushCode = () => {
     if (codeBuffer.length) {
       htmlParts.push(
-        `<pre><code>${escapeHtml(codeBuffer.join("\n"))}</code></pre>`,
+        `<pre><code>${escapeHtml(codeBuffer.join("\n"))}</code></pre>`
       );
       codeBuffer = [];
     }
@@ -466,18 +468,20 @@ function renderMarkdown(markdown: string) {
       flushParagraph();
       flushList();
       const level = headingMatch[1].length;
-      const content = applyInlineFormatting(headingMatch[2]);
+      const content = applyInlineFormatting(headingMatch[2].trim());
       htmlParts.push(`<h${level}>${content}</h${level}>`);
       return;
     }
 
     const listMatch = line.match(/^\s*[-*+]\s+(.*)$/);
     if (listMatch) {
-      flushParagraph();
-      listItems.push(listMatch[1]);
+      flushParagraph(); // flush paragraph before adding list items
+      listItems.push(listMatch[1].trim());
       return;
     }
 
+    // If line is normal text, flush list first then add line to paragraph
+    flushList();
     paragraph.push(line.trim());
   });
 
@@ -485,11 +489,13 @@ function renderMarkdown(markdown: string) {
     flushCode();
   }
 
+  // Flush any remaining content
   flushParagraph();
   flushList();
 
   return htmlParts.join("");
 }
+
 
 const VALID_FLAGS = new Set(["g", "i", "m", "s", "u", "y"]);
 
@@ -1373,11 +1379,20 @@ function Base64Studio() {
 
 function MarkdownPreviewer() {
   const [markdown, setMarkdown] = useState(
-    `# Welcome to Dev Toolbox Pro\n\nCraft utilities faster with a modern interface.\n\n- JSON formatting\n- UUID history\n- Color palettes\n\n**Tip:** This renderer covers headings, lists, emphasis, inline code, and links.\n\n[Builder.io Projects](https://www.builder.io/c/docs/projects)`
+    `# Welcome to Dev Toolbox Pro\n\nCraft utilities faster with a modern interface.\n\n- JSON formatting\n- UUID history\n- Color palettes\n\n**Tip:** This renderer covers headings, lists, emphasis, inline code, and links.\n\n_This is **italics**_`,
   );
 
-  const html = useMemo(() => renderMarkdown(markdown), [markdown]);
+  const [html, setHtml] = useState<string>("");
 
+  useEffect(() => {
+    const renderMarkdown = async () => {
+      const rawHtml = await marked.parse(markdown);
+      const cleanHtml = DOMPurify.sanitize(rawHtml);
+      setHtml(cleanHtml);
+    };
+    renderMarkdown();
+  }, [markdown]);
+  
   return (
     <Card className="border border-border/70 bg-card/70 shadow-soft backdrop-blur">
       <CardHeader className="gap-4 pb-4">
@@ -1393,16 +1408,19 @@ function MarkdownPreviewer() {
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 lg:grid-cols-2">
+          {/* Left column: Markdown input */}
           <label className="flex flex-col gap-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Markdown input
             </span>
             <textarea
               value={markdown}
-              onChange={(event) => setMarkdown(event.target.value)}
+              onChange={(e) => setMarkdown(e.target.value)}
               className="min-h-[280px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </label>
+
+          {/* Right column: Preview */}
           <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Preview
@@ -1413,11 +1431,25 @@ function MarkdownPreviewer() {
             />
           </div>
         </div>
+
+        {/* Buttons below the grid, aligned right (under Preview) */}
+        <div className="flex justify-end gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => navigator.clipboard.writeText(markdown)}
+            disabled={!markdown.trim()}
+          >
+            <Copy className="h-4 w-4 mr-2" /> Copy
+          </Button>
+          <Button size="sm" variant="ghost" onClick={() => setMarkdown("")}>
+            <Trash2 className="h-4 w-4 mr-2" /> Clear
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );
 }
-
 export default function Index() {
   const { theme, toggle } = useThemeMode();
   const [activeTool, setActiveTool] = useState<ToolId>("json");
