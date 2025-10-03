@@ -1204,11 +1204,9 @@ function RegexTester() {
             <h4 className="text-sm font-semibold text-muted-foreground">
               Replace preview
             </h4>
-            <textarea
-              readOnly
-              value={replacePreview}
-              className="min-h-[140px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm"
-            />
+            <div className="min-h-[140px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm">
+              {replacePreview}
+            </div>
           </div>
         </div>
         <div className="space-y-3">
@@ -1233,9 +1231,7 @@ function RegexTester() {
                   <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     <span>Index: {match.index}</span>
                     {match.groups.length > 0 && (
-                      <span>
-                        Groups: {match.groups.join(", ") || "—"}
-                      </span>
+                      <span>Groups: {match.groups.join(", ") || "—"}</span>
                     )}
                   </div>
                 </div>
