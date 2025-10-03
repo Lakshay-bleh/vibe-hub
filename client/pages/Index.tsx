@@ -404,97 +404,6 @@ function applyInlineFormatting(text: string) {
     );
 }
 
-function renderMarkdown(markdown: string) {
-  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
-  const htmlParts: string[] = [];
-  let paragraph: string[] = [];
-  let listItems: string[] = [];
-  let inCodeBlock = false;
-  let codeBuffer: string[] = [];
-
-  const flushParagraph = () => {
-    if (paragraph.length) {
-      htmlParts.push(`<p>${applyInlineFormatting(paragraph.join("\n").trim())}</p>`);
-      paragraph = [];
-    }
-  };
-
-  const flushList = () => {
-    if (listItems.length) {
-      const listHtml = listItems
-        .map((item) => `<li>${applyInlineFormatting(item.trim())}</li>`)
-        .join("");
-      htmlParts.push(`<ul>${listHtml}</ul>`);
-      listItems = [];
-    }
-  };
-
-  const flushCode = () => {
-    if (codeBuffer.length) {
-      htmlParts.push(
-        `<pre><code>${escapeHtml(codeBuffer.join("\n"))}</code></pre>`
-      );
-      codeBuffer = [];
-    }
-  };
-
-  lines.forEach((line) => {
-    if (line.trim().startsWith("```") && !inCodeBlock) {
-      flushParagraph();
-      flushList();
-      inCodeBlock = true;
-      return;
-    }
-
-    if (line.trim().startsWith("```") && inCodeBlock) {
-      flushCode();
-      inCodeBlock = false;
-      return;
-    }
-
-    if (inCodeBlock) {
-      codeBuffer.push(line);
-      return;
-    }
-
-    if (line.trim() === "") {
-      flushParagraph();
-      flushList();
-      return;
-    }
-
-    const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
-    if (headingMatch) {
-      flushParagraph();
-      flushList();
-      const level = headingMatch[1].length;
-      const content = applyInlineFormatting(headingMatch[2].trim());
-      htmlParts.push(`<h${level}>${content}</h${level}>`);
-      return;
-    }
-
-    const listMatch = line.match(/^\s*[-*+]\s+(.*)$/);
-    if (listMatch) {
-      flushParagraph(); // flush paragraph before adding list items
-      listItems.push(listMatch[1].trim());
-      return;
-    }
-
-    // If line is normal text, flush list first then add line to paragraph
-    flushList();
-    paragraph.push(line.trim());
-  });
-
-  if (inCodeBlock) {
-    flushCode();
-  }
-
-  // Flush any remaining content
-  flushParagraph();
-  flushList();
-
-  return htmlParts.join("");
-}
 
 
 const VALID_FLAGS = new Set(["g", "i", "m", "s", "u", "y"]);
@@ -1076,7 +985,8 @@ function RegexTester() {
 
     try {
       const sanitized = sanitizeFlags(flags);
-      return { regex: new RegExp(pattern, sanitized), error: "" };
+      const fullWordPattern = `(\\w*${pattern}\\w*)`;
+      return { regex: new RegExp(fullWordPattern, sanitized), error: "" };
     } catch (err) {
       return {
         regex: null,
@@ -1089,23 +999,51 @@ function RegexTester() {
   }, [pattern, flags]);
 
   const matches = useMemo(() => {
-    if (!regex || !pattern) {
-      return [] as { value: string; index: number; groups: string[] }[];
-    }
+    if (!regex || !pattern) return [];
 
     try {
-      const globalRegex = new RegExp(regex.source, ensureGlobalFlags(regex.flags));
+      const globalRegex = new RegExp(
+        regex.source,
+        ensureGlobalFlags(regex.flags),
+      );
       const entries = Array.from(input.matchAll(globalRegex));
-      return entries.map((match) => ({
-        value: match[0],
-        index: match.index ?? 0,
-        groups: match.slice(1),
-      }));
+
+      return entries.map((match) => {
+        const matchIndex = match.index ?? 0;
+
+        // Get the full word that contains the match
+        const fullWord = input.slice(matchIndex).match(/^\w+/)?.[0] || match[0];
+
+        return {
+          value: match[0],
+          index: matchIndex,
+          groups: [fullWord],
+        };
+      });
     } catch (err) {
       console.warn("Regex execution error", err);
       return [];
     }
-  }, [input, regex, pattern]);
+  }, [input, regex, pattern]);  
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const matchesPerPage = 10;
+  const [pageInput, setPageInput] = useState("1");
+
+  const totalPages = Math.ceil(matches.length / matchesPerPage);
+  const paginatedMatches = useMemo(() => {
+    const start = (currentPage - 1) * matchesPerPage;
+    return matches.slice(start, start + matchesPerPage);
+  }, [matches, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [pattern, input, flags]);  
+
+  useEffect(() => {
+    setPageInput(String(currentPage));
+  }, [currentPage]);
+  
 
   const highlightedInput = useMemo(() => {
     if (!regex || !pattern) {
@@ -1157,7 +1095,7 @@ function RegexTester() {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-[2fr,1fr]">
+        <div className="grid gap-4">
           <label className="flex flex-col gap-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Pattern
@@ -1167,6 +1105,19 @@ function RegexTester() {
               onChange={(event) => setPattern(event.target.value)}
               className="h-11 rounded-xl border border-border/70 bg-background/80 px-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               placeholder="(pattern)"
+            />
+          </label>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-[2fr,1fr]">
+          <label className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              Replace with
+            </span>
+            <input
+              value={replaceWith}
+              onChange={(event) => setReplaceWith(event.target.value)}
+              className="h-11 rounded-xl border border-border/70 bg-background/80 px-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              placeholder="replacement"
             />
           </label>
           <label className="flex flex-col gap-2">
@@ -1188,7 +1139,7 @@ function RegexTester() {
           <textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
-            className="h-40 w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+            className="min-h-40 max-h-40 w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </label>
         {error && (
@@ -1202,7 +1153,7 @@ function RegexTester() {
               Highlighted matches
             </h4>
             <div
-              className="min-h-[140px] rounded-2xl border border-border/70 bg-background/80 p-4 text-sm leading-relaxed"
+              className="h-40 overflow-auto rounded-2xl border border-border/70 bg-background/80 p-4 text-sm leading-relaxed"
               dangerouslySetInnerHTML={{ __html: highlightedInput }}
             />
           </div>
@@ -1217,32 +1168,94 @@ function RegexTester() {
         </div>
         <div className="space-y-3">
           <h4 className="text-sm font-semibold text-muted-foreground">
-            Match details
+            Match details ({matches.length} total)
           </h4>
+
           {matches.length === 0 ? (
             <p className="rounded-2xl border border-dashed border-border/60 bg-background/60 p-3 text-sm text-muted-foreground">
               No matches yet. Adjust your pattern or flags.
             </p>
           ) : (
-            <div className="space-y-2">
-              {matches.map((match, index) => (
-                <div
-                  key={`${match.value}-${match.index}-${index}`}
-                  className="flex flex-col gap-2 rounded-2xl border border-border/60 bg-background/60 px-4 py-3 md:flex-row md:items-center md:justify-between"
-                >
-                  <div className="flex items-center gap-2 text-sm font-medium text-foreground/80">
-                    <Regex className="h-4 w-4 text-primary" />
-                    <span>{match.value}</span>
+            <>
+              <p className="text-xs text-muted-foreground">
+                Showing {paginatedMatches.length} of {matches.length} matches
+                (Page {currentPage} of {totalPages})
+              </p>
+
+              <div className="space-y-2">
+                {paginatedMatches.map((match, index) => (
+                  <div
+                    key={`${match.value}-${match.index}-${index}`}
+                    className="flex flex-col gap-2 rounded-2xl border border-border/60 bg-background/60 px-4 py-3 md:flex-row md:items-center md:justify-between"
+                  >
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground/80">
+                      <Regex className="h-4 w-4 text-primary" />
+                      <span>{match.value}</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                      <span>Index: {match.index}</span>
+                      {match.groups.length > 0 && (
+                        <span>Groups: {match.groups.join(", ") || "—"}</span>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                    <span>Index: {match.index}</span>
-                    {match.groups.length > 0 && (
-                      <span>Groups: {match.groups.join(", ") || "—"}</span>
-                    )}
-                  </div>
+                ))}
+              </div>
+
+              {/* Pagination controls */}
+              {totalPages > 1 && (
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-4 text-sm">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(prev - 1, 1))
+                    }
+                    disabled={currentPage === 1}
+                    className="rounded-lg border border-border bg-background/80 px-3 py-1 disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+
+                  <span className="text-muted-foreground">Page</span>
+
+                  <input
+                    type="number"
+                    min={1}
+                    max={totalPages}
+                    value={pageInput}
+                    onChange={(e) => setPageInput(e.target.value)}
+                    onBlur={() => {
+                      const pageNum = Math.max(
+                        1,
+                        Math.min(Number(pageInput), totalPages),
+                      );
+                      setCurrentPage(pageNum);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        const pageNum = Math.max(
+                          1,
+                          Math.min(Number(pageInput), totalPages),
+                        );
+                        setCurrentPage(pageNum);
+                      }
+                    }}
+                    className="w-12 rounded-md border border-border bg-background px-2 py-1 text-center font-mono focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+
+                  <span className="text-muted-foreground">of {totalPages}</span>
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                    }
+                    disabled={currentPage === totalPages}
+                    className="rounded-lg border border-border bg-background/80 px-3 py-1 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
                 </div>
-              ))}
-            </div>
+              )}
+            </>
           )}
         </div>
       </CardContent>
@@ -1328,7 +1341,7 @@ function Base64Studio() {
             <textarea
               value={input}
               onChange={(event) => setInput(event.target.value)}
-              className="min-h-[160px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="min-h-[160px] max-h-[160px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </label>
           <label className="flex flex-col gap-2">
@@ -1338,7 +1351,7 @@ function Base64Studio() {
             <textarea
               readOnly
               value={output}
-              className="min-h-[160px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="min-h-[160px] max-h-[160px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
             <div className="flex gap-2">
               <Button
@@ -1399,8 +1412,9 @@ function MarkdownPreviewer() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <CardTitle className="text-2xl">Markdown Previewer</CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-1 mb-3">
               Draft copy and review a live, sanitized preview side-by-side.
+              Lightweight renderer for Markdown.
             </CardDescription>
           </div>
           <Badge variant="secondary">Lightweight renderer</Badge>
@@ -1416,23 +1430,21 @@ function MarkdownPreviewer() {
             <textarea
               value={markdown}
               onChange={(e) => setMarkdown(e.target.value)}
-              className="min-h-[280px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="min-h-[300px] max-h-[300px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </label>
 
-          {/* Right column: Preview */}
           <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Preview
             </span>
             <div
-              className="markdown-preview prose prose-sm max-w-none rounded-2xl border border-border/70 bg-background/80 p-6 text-foreground dark:prose-invert"
+              className="min-h-[300px] markdown-preview prose prose-sm max-w-none rounded-2xl border border-border/70 bg-background/80 p-6 text-foreground dark:prose-invert"
               dangerouslySetInnerHTML={{ __html: html }}
             />
           </div>
         </div>
 
-        {/* Buttons below the grid, aligned right (under Preview) */}
         <div className="flex justify-end gap-2">
           <Button
             size="sm"
@@ -1450,6 +1462,7 @@ function MarkdownPreviewer() {
     </Card>
   );
 }
+
 export default function Index() {
   const { theme, toggle } = useThemeMode();
   const [activeTool, setActiveTool] = useState<ToolId>("json");
