@@ -492,7 +492,7 @@ function ToolSidebar({
         ))}
       </nav>
       <div className="rounded-2xl border border-border/70 bg-background/80 p-4 text-xs text-muted-foreground">
-        Tip: use Tab to jump between tabs instantly.
+        Tip: use Ctrl + Up/Down to jump between tabs instantly.
       </div>
     </aside>
   );
