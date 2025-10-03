@@ -1303,7 +1303,10 @@ function Base64Studio() {
             <Button
               size="sm"
               variant={mode === "decode" ? "default" : "ghost"}
-              onClick={() => setMode("decode")}
+              onClick={() => {
+                setMode("decode");
+                setInput("RGV2IFRvb2xib3ggUHJv");
+              }}
             >
               Decode
             </Button>
@@ -1329,16 +1332,31 @@ function Base64Studio() {
             <textarea
               readOnly
               value={output}
-              className="min-h-[160px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm"
+              className="min-h-[160px] w-full rounded-2xl border border-border/70 bg-background/80 p-4 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
             <div className="flex gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => copyToClipboard(output, "Base64 result copied to clipboard.")}
+                onClick={() =>
+                  copyToClipboard(output, "Base64 result copied to clipboard.")
+                }
                 disabled={!output}
               >
                 <Copy className="h-4 w-4" /> Copy result
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  setInput("");
+                  setOutput("");
+                  setError("");
+                }}
+                title="Clear both input and output"
+              >
+                <Trash2 className="h-4 w-4" />
+                Clear
               </Button>
             </div>
           </label>
