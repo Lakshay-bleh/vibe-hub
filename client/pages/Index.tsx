@@ -248,7 +248,7 @@ function normalizeHex(hex: string): string {
     return `#${expanded}`.toUpperCase();
   }
 
-  return "#6750FF";
+  return "#529DFF";
 }
 
 type HslColor = {
@@ -853,8 +853,8 @@ function ColorPalettePicker() {
     PALETTE_FAVORITES_KEY,
     [],
   );
-  const [baseColor, setBaseColor] = useState("#6750FF");
-  const [hexInput, setHexInput] = useState("#6750FF");
+  const [baseColor, setBaseColor] = useState("#529DFF");
+  const [hexInput, setHexInput] = useState("#529DFF");
 
   useEffect(() => {
     const normalized = normalizeHex(hexInput);
