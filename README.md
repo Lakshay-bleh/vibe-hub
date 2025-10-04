@@ -1,4 +1,4 @@
-# 🛠️ Dev Toolkit
+# 🛠️ Dev Toolkit Pro
 
 A clean, responsive, and beginner-first **developer toolbox** created for the **Vibe Coding Challenge (Stage-2)**.  
 This app offers everyday developer utilities in one place to speed up development and experimentation.
