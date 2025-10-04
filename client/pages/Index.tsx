@@ -1366,7 +1366,7 @@ function Base64Studio() {
               </Button>
               <Button
                 size="sm"
-                variant="outline"
+                variant="ghost"
                 onClick={() => {
                   setInput("");
                   setOutput("");

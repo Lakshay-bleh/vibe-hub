@@ -15,13 +15,12 @@ This app offers everyday developer utilities in one place to speed up developmen
 - **Markdown Previewer** – Live preview of Markdown with styling
 
 ---
-
 ## 🖥️ Tech Stack
 
 | Layer             | Tools / Libraries                            |
 |-------------------|----------------------------------------------|
 | **Frontend**      | React, TailwindCSS                           |
-| **Logic**         | Vanilla JavaScript (JSON, UUID, Regex, etc.) |
+| **Logic**         | TypeScript (JSON, UUID, Regex, etc.) |
 | **State**         | React hooks, `localStorage`                  |
 | **UI Design**     | Builder.io (initial UI scaffolding only)     |
 | **Styling**       | TailwindCSS + Custom Global Styles           |
