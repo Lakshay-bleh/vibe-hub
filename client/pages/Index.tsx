@@ -1405,7 +1405,7 @@ function MarkdownPreviewer() {
     };
     renderMarkdown();
   }, [markdown]);
-  
+
   return (
     <Card className="border border-border/70 bg-card/70 shadow-soft backdrop-blur">
       <CardHeader className="gap-4 pb-4">

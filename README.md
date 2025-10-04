@@ -36,7 +36,7 @@ cd dev-toolkit
 npm install
 npm run dev
 ```
-Then visit: http://localhost:5173/
+Then visit: http://localhost:8080/
 
 ---
 ## 🤝 Ethical Disclosure
