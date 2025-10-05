@@ -1,4 +1,4 @@
-# 🛠️ Dev Toolkit Pro
+ # 🛠️ Dev Toolkit Pro
 
 A clean, responsive, and beginner-first **developer toolbox** created for the **Vibe Coding Challenge (Stage-2)**.  
 This app offers everyday developer utilities in one place to speed up development and experimentation.
@@ -58,16 +58,14 @@ All external tools and sources used are properly credited below.
 ---
 ## ⚙️ Assisted Contributions
 
-- Some limited areas involved use of AI tools (like ChatGPT) and Builder.io for faster development, including:
-- Drafting early folder structure and component layout
-- Suggestions for TailwindCSS class combinations
-- Fixing minor bugs in JSON validation, RegEx testing, etc.
-- Providing markdown for this README (reviewed and re-written)
-- Builder.io used as an initial UI wireframing/scaffolding tool
-- Helped implement minor enhancements like keyboard shortcuts & toasts
+- Used AI tools (ChatGPT) for drafting initial folder structures, component layouts, and providing quick development suggestions.
+- Leveraged AI for optimizing TailwindCSS class combinations and improving UI responsiveness.
+- Utilized Builder.io for rapid prototyping and UI wireframing to speed up the design process.
+- Took AI assistance for debugging small issues such as JSON validation, RegEx testing, and minor code refinements.
+- Generated an early draft of the README markdown, which was later reviewed, restructured, and refined by the team.
+- Incorporated AI-driven suggestions for user experience enhancements, such as keyboard shortcuts and toast notifications.
 
-- 🔐 Note: All AI-generated content was reviewed, customized, and modified before being used in the final build.
-- No full features were copy-pasted or used without editing.
+🔐 **Note:** All AI-assisted contributions were reviewed, customized, and refined by the team before integration. No feature was directly copy-pasted or used without modification.
 
 ---
 ## 🧩 Tools & Libraries
