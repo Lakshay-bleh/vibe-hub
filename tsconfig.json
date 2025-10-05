@@ -36,8 +36,8 @@
     "client/**/*",
     "server/**/*",
     "shared/**/*",
-    "vite.config.ts",
-    "vite.config.server.ts"
+    "vite.config.js",
+    "vite.config.server.js"
   ],
   "exclude": ["node_modules", "dist"]
 }
